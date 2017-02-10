@@ -61,9 +61,9 @@ def parse_date(date_str):
 
 
 def get_bool(bool_str):
-    if bool_str in ('true', 'True', '1'):
+    if bool_str.lower() in ('true', '1'):
         return True
-    if bool_str in ('false', 'False', '0'):
+    if bool_str.lower() in ('false', '0'):
         return False
     raise ValueError("Invalid boolean value {}".format(bool_str))
 
