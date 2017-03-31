@@ -16,6 +16,9 @@ class AbstractRepository(object):
     def get_bikes(self):
         raise NotImplementedError()
 
+    def update_activity(self, id, data):
+        raise NotImplementedError()
+
 
 class ApiRepository(AbstractRepository):
 
@@ -40,6 +43,9 @@ class ApiRepository(AbstractRepository):
     def get_bikes(self):
         athlete = self._client.get_athlete()
         return athlete["bikes"]
+
+    def update_activity(self, id, data):
+        self._client.update_activity(id, **data)
 
 
 class CachedRepository(AbstractRepository):
@@ -68,21 +74,39 @@ class CachedRepository(AbstractRepository):
         max_date = max([parse_date(a['start_date_local']) for a in activities])
         return time.mktime(max_date.timetuple())
 
+    def _init_cache(self):
+        activities = self.get_all_activities()
+        self._cache.update_activities(activities)
+
+    def _update_cache(self):
+        activities = self._cache.get_activities()
+        timestamp = self._get_latest_timestamp(activities)
+        new_activities = self._client.get_activities_after(timestamp)
+        self._cache.update_activities(new_activities + activities)
+
     def get_activities(self):
-        cache = self._cache.load()
-        if cache is None:
-            cache = {}
-            cache["activities"] = self.get_all_activities()
+        activities = self._cache.get_activities()
+        if not self._cache.is_initialized():
+            self._init_cache()
         else:
-            timestamp = self._get_latest_timestamp(cache["activities"])
-            new_activities = self._client.get_activities_after(timestamp)
-            cache["activities"] = new_activities + cache["activities"]
-        self._cache.update(cache)
-        return cache['activities']
+            self._update_cache()
+        return self._cache.get_activities()
 
     def get_bikes(self):
         athlete = self._client.get_athlete()
         return athlete["bikes"]
+
+    def _merge_activity(self, activity, data):
+        for k, v in data.items():
+            if k in activity:
+                activity[k] = v
+
+    def update_activity(self, id, data):
+        self._client.update_activity(id, **data)
+        activity = self._cache.get_activity(id)
+        if activity is not None:
+            self._merge_activity(activity, data)
+            self._cache.update_activity(activity)
 
 
 def get_repository(token):

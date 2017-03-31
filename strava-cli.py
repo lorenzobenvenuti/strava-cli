@@ -16,8 +16,21 @@ def list_activities(args):
             print f.format(activity)
 
 
+def get_update_data(args):
+    data = {}
+    for value in args.set:
+        tokens = value.split('=')
+        if len(tokens) != 2:
+            raise ValueError("Invalid argument {}".format(value))
+        data[tokens[0]] = tokens[1]
+    return data
+
+
 def update_activities(args):
-    raise NotImplementedError
+    r = repository.get_repository(args.token)
+    data = get_update_data(args)
+    for id in args.id:
+        r.update_activity(int(id), data)
 
 
 def activities_details(args):
@@ -51,7 +64,7 @@ if __name__ == "__main__":
 
     parser_details = subparsers.add_parser('details', help='Retrieves the '
                                            'details of one or more activities')
-    parser_details.add_argument('activity-id',
+    parser_details.add_argument('id',
                                 nargs='+', help='Activity id(s)')
     parser_details.set_defaults(func=activities_details)
 
@@ -59,7 +72,7 @@ if __name__ == "__main__":
                                           help='Update one or more activities')
     parser_update.add_argument('--set', '-s', action='append',
                                required=True, help='Sets a property')
-    parser_update.add_argument('activity-id', nargs='+', help='Activity id(s)')
+    parser_update.add_argument('id', nargs='+', help='Activity id(s)')
     parser_update.set_defaults(func=update_activities)
 
     parser_bikes = subparsers.add_parser('bikes', help='Retrieve bikes')

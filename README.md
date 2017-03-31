@@ -101,7 +101,35 @@ TODO
 
 ### Updating activities
 
-TODO
+You can update one ore more activities using the `update` command. The syntax is:
+
+```
+$ ./strava-cli.py update -h
+usage: strava-cli.py update [-h] --set SET id [id ...]
+
+positional arguments:
+  id                 Activity id(s)
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --set SET, -s SET  Sets a property
+```
+
+Supported properties are described in the [Strava API v3 specification](https://strava.github.io/api/v3/activities/#put-updates).
+
+When an update operation is performed the cache is updated accordingly; on the other hand updating an activity using another requires to clear the `strava-cli` cache in order to see the updated values.
+
+* Change name and description of an activity:
+
+```
+$ ./strava-cli.py -t <token> update -s "name=New activity name" -s "description=New activity description" <activity-id>
+```
+
+* Make all your indoor activities private:
+
+```
+$ ./strava-cli.py -t <token> update -s private=true $(./strava-cli.py -t <token> activities -q -f trainer=true)
+```
 
 ### Listing gear
 
@@ -112,7 +140,7 @@ $ ./strava-cli.py -t <token> bikes
 ## TODO
 
 * Support `--format` option to format output
-* Implement activity update
 * Implement activity detail
 * Implement filter for activity title
 * Implement command for total distance and climb
+* Performance: flush the cache just once
