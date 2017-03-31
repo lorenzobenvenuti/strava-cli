@@ -4,6 +4,7 @@ import argparse
 import repository
 import predicates
 import formatters
+import cache
 
 
 def list_activities(args):
@@ -30,8 +31,7 @@ def list_bikes(args):
 
 
 def clear_cache(args):
-    print "CLEAR_CACHE"
-    print args
+    cache.get_cache().clear()
 
 
 if __name__ == "__main__":

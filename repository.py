@@ -1,9 +1,8 @@
-import os.path
-import os
 import api
 import json
 import time
 from util import parse_date
+import cache
 
 
 class AbstractRepository(object):
@@ -47,25 +46,9 @@ class CachedRepository(AbstractRepository):
 
     page_size = 30
 
-    def __init__(self, token):
+    def __init__(self, token, cache):
         self._client = api.Client(token)
-
-    def _get_cache(self):
-        cache_dir = os.path.join(os.path.expanduser('~'), ".strava-cli")
-        if not os.path.exists(cache_dir):
-            return None
-        cache_file = os.path.join(cache_dir, "activities.json")
-        if not os.path.exists(cache_file):
-            return None
-        with open(cache_file) as json_data:
-            return json.load(json_data)
-
-    def _save_cache(self, cache):
-        cache_dir = os.path.join(os.path.expanduser('~'), ".strava-cli")
-        if not os.path.exists(cache_dir):
-            os.makedirs(cache_dir)
-        with open(os.path.join(cache_dir, 'activities.json'), 'w') as outfile:
-            json.dump(cache, outfile)
+        self._cache = cache
 
     def get_all_activities(self):
         all_activities = []
@@ -86,7 +69,7 @@ class CachedRepository(AbstractRepository):
         return time.mktime(max_date.timetuple())
 
     def get_activities(self):
-        cache = self._get_cache()
+        cache = self._cache.load()
         if cache is None:
             cache = {}
             cache["activities"] = self.get_all_activities()
@@ -94,7 +77,7 @@ class CachedRepository(AbstractRepository):
             timestamp = self._get_latest_timestamp(cache["activities"])
             new_activities = self._client.get_activities_after(timestamp)
             cache["activities"] = new_activities + cache["activities"]
-        self._save_cache(cache)
+        self._cache.update(cache)
         return cache['activities']
 
     def get_bikes(self):
@@ -103,4 +86,4 @@ class CachedRepository(AbstractRepository):
 
 
 def get_repository(token):
-    return CachedRepository(token)
+    return CachedRepository(token, cache.get_cache())
