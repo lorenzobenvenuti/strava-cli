@@ -64,6 +64,8 @@ The `--filter` (or `-f`) option allows you to filter activities. Supported filte
 * `before=YYYY[MM[DD]]`
 * `trainer=0|1|true|false`
 * `private=0|1|true|false`
+* `elevation=[MIN]-[MAX]`
+* `distance=[MIN]-[MAX]`
 
 Some examples:
 
@@ -85,6 +87,14 @@ $ ./strava-cli -t <token> activities -f private=1
 $ ./strava-cli -t <token> activities -f private=1 -f after=201701 -f before=201702
 ```
 
+* Retrieve rides of 2016 with at least 1200m of elevation gain:
+
+```
+$ ./strava-cli.py -t <token> activities -f before=20161231 -f after=20160101 -f  elevation=1200-
+
+```
+
+
 ### Retrieving activity details
 
 TODO
@@ -101,8 +111,8 @@ $ ./strava-cli.py -t <token> bikes
 
 ## TODO
 
-* Format output
+* Support `--format` option to format output
 * Implement activity update
 * Implement activity detail
-* Implement filter for climb, distance, activity title
+* Implement filter for activity title
 * Implement command for total distance and climb

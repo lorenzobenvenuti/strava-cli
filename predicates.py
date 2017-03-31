@@ -46,6 +46,22 @@ class BoolPredicate(Predicate):
         return value[self._name] == self._value
 
 
+class RangePredicate(Predicate):
+
+    def __init__(self, name, min_value, max_value):
+        self._name = name
+        self._min = min_value
+        self._max = max_value
+
+    def matches(self, value):
+        num = value[self._name]
+        if self._min is None:
+            return num < self._max
+        if self._max is None:
+            return num > self._min
+        return num > self._min and num < self._max
+
+
 class AndPredicate(Predicate):
 
     def __init__(self, predicates):
@@ -66,12 +82,23 @@ def parse_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y%m%d")
 
 
-def get_bool(bool_str):
+def parse_bool(bool_str):
     if bool_str.lower() in ('true', '1'):
         return True
     if bool_str.lower() in ('false', '0'):
         return False
     raise ValueError("Invalid boolean value {}".format(bool_str))
+
+
+def parse_range(range_str):
+    tokens = range_str.split('-')
+    if len(tokens) != 2 or (not tokens[0] and not tokens[1]):
+        raise ValueError("Invalid range {}".format(range_str))
+    if not tokens[0]:
+        return (None, float(tokens[1]))
+    elif not tokens[1]:
+        return (float(tokens[0]), None)
+    return (float(tokens[0]), float(tokens[1]))
 
 
 def get_predicate(name, value):
@@ -80,10 +107,15 @@ def get_predicate(name, value):
     if name == "after":
         return AfterPredicate(parse_date(value))
     if name == "trainer":
-        return BoolPredicate('trainer', get_bool(value))
+        return BoolPredicate('trainer', parse_bool(value))
     if name == "private":
-        return BoolPredicate('private', get_bool(value))
-    # TODO: descrizione? Titolo?
+        return BoolPredicate('private', parse_bool(value))
+    if name == "distance":
+        min_value, max_value = parse_range(value)
+        return RangePredicate('distance', min_value, max_value)
+    if name == "elevation":
+        min_value, max_value = parse_range(value)
+        return RangePredicate('total_elevation_gain', min_value, max_value)
     raise ValueError("Invalid type {}".format(name))
 
 

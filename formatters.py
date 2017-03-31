@@ -13,7 +13,8 @@ class QuietFormatter(Formatter):
 class DefaultFormatter(Formatter):
 
     def format(self, activity):
-        return u"{id}\t{name}\t{distance}".format(**activity)
+        return u"{id}\t{name}\t{distance}\t{total_elevation_gain}"\
+                .format(**activity)
 
 
 def get_formatter(quiet):
