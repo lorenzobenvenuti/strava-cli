@@ -3,14 +3,16 @@
 import argparse
 import repository
 import predicates
+import formatters
 
 
 def list_activities(args):
     r = repository.get_repository(args.token)
     p = predicates.get_predicate_from_filters(args.filter)
+    f = formatters.get_formatter(args.quiet)
     for activity in r.get_activities():
         if p.matches(activity):
-            print u"{id}; {name}; {distance}; {gear_id}".format(**activity)
+            print f.format(activity)
 
 
 def update_activities(args):

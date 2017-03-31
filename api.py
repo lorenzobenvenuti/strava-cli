@@ -6,7 +6,7 @@ class Client(object):
     def __init__(self, token):
         self._token = token
 
-    def _perform_request(self, url):
+    def _get(self, url):
         r = requests.get(url, headers={
             "Authorization": "Bearer {}".format(self._token)})
         if r.status_code != 200:
@@ -14,20 +14,20 @@ class Client(object):
         return r.json()
 
     def get_activities_page(self, page, per_page):
-        return self._perform_request(
+        return self._get(
             "https://www.strava.com/api/v3/athlete/activities" +
             "?page={}&per_page={}".format(page, per_page))
 
     def get_activities_after(self, seconds_from_epoch):
-        activities = self._perform_request(
+        activities = self._get(
             "https://www.strava.com/api/v3/athlete/activities" +
             "?after={}".format(seconds_from_epoch))
         activities.reverse()
         return activities
 
     def get_activity(self, id):
-        return self._perform_request(
+        return self._get(
             "https://www.strava.com/api/v3/activities/{}".format(id))
 
     def get_athlete(self):
-        return self._perform_request("https://www.strava.com/api/v3/athlete")
+        return self._get("https://www.strava.com/api/v3/athlete")

@@ -3,6 +3,7 @@ import os
 import api
 import json
 import time
+from util import parse_date
 
 
 class AbstractRepository(object):
@@ -66,7 +67,7 @@ class CachedRepository(AbstractRepository):
         with open(os.path.join(cache_dir, 'activities.json'), 'w') as outfile:
             json.dump(cache, outfile)
 
-    def get_all_activities(self, client):
+    def get_all_activities(self):
         all_activities = []
         page = 1
         num = CachedRepository.page_size
@@ -78,16 +79,21 @@ class CachedRepository(AbstractRepository):
             page += 1
         return all_activities
 
+    def _get_latest_timestamp(self, activities):
+        if not activities:
+            return 0
+        max_date = max([parse_date(a['start_date_local']) for a in activities])
+        return time.mktime(max_date.timetuple())
+
     def get_activities(self):
         cache = self._get_cache()
-        now = int(time.time())
         if cache is None:
             cache = {}
-            cache["activities"] = self.get_all_activities(client)
+            cache["activities"] = self.get_all_activities()
         else:
-            new_activities = self._client.get_activities_after(now)
+            timestamp = self._get_latest_timestamp(cache["activities"])
+            new_activities = self._client.get_activities_after(timestamp)
             cache["activities"] = new_activities + cache["activities"]
-        cache["timestamp"] = now
         self._save_cache(cache)
         return cache['activities']
 

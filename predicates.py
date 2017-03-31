@@ -1,5 +1,6 @@
 import time
 import datetime
+import util
 
 
 class Predicate(object):
@@ -8,14 +9,19 @@ class Predicate(object):
         raise NotImplementedError
 
 
+class AlwaysTruePredicate(Predicate):
+
+    def matches(self, value):
+        return True
+
+
 class DatePredicate(Predicate):
 
     def __init__(self, date):
         self._date = date
 
     def _parse_date(self, value):
-        return datetime.datetime.strptime(
-            value['start_date_local'], '%Y-%m-%dT%H:%M:%SZ')
+        return util.parse_date(value['start_date_local'])
 
 
 class AfterPredicate(DatePredicate):
@@ -83,6 +89,8 @@ def get_predicate(name, value):
 
 def get_predicate_from_filters(items):
     predicates = []
+    if items is None:
+        return AlwaysTruePredicate()
     for item in items:
         try:
             key, value = item.split("=", 1)

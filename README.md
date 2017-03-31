@@ -1,10 +1,14 @@
 # strava-cli
 
-Command line interface for [Strava](http://www.strava.com).
+Command line interface for [Strava](http://www.strava.com). It allows:
+
+* Retrieve infomations and stats about your activities matching certain criteria
+* Bulk update activities
 
 ## Obtaining a token
 
 Strava uses a 3-legged OAuth flow in order to allow the application to access user data.
+
 To obtain an access token:
 
 * Obtain a client id and a client secret from Strava
@@ -94,3 +98,11 @@ TODO
 ```
 $ ./strava-cli.py -t <token> bikes
 ```
+
+## TODO
+
+* Format output
+* Implement activity update
+* Implement activity detail
+* Implement filter for climb, distance, activity title
+* Implement command for total distance and climb
