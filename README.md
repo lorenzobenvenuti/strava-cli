@@ -144,3 +144,4 @@ $ ./strava-cli.py -t <token> bikes
 * Implement filter for activity title
 * Implement command for total distance and climb
 * Performance: flush the cache just once
+* Read authentication token from an environment variable
