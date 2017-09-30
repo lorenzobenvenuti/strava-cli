@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 
+import auth
 import argparse
 import repository
 import predicates
 import formatters
 import cache
-import token
+import authtoken
+
+
+def authenticate(args):
+    a = auth.Authorizer(args.port)
+    a.authorize(args.client_id, args.client_secret)
 
 
 def get_token(args):
-    tkn = token.get_token_provider(args).get_token()
+    tkn = authtoken.get_token_provider(args).get_token()
     if tkn is None:
         import sys
         print ("No token specified - please"
@@ -60,7 +66,7 @@ def clear_cache(args):
 
 
 def store_token(args):
-    token.get_token_store(args).store_token(args.token)
+    authtoken.get_token_store(args).store_token(args.token)
 
 
 if __name__ == "__main__":
@@ -95,6 +101,16 @@ if __name__ == "__main__":
     parser_clear_cache = subparsers.add_parser('clear-cache',
                                                help='Clear the cache')
     parser_clear_cache.set_defaults(func=clear_cache)
+
+    parser_auth = subparsers.add_parser('authenticate', help='Authenticate '
+                                        'using a client secret and client id')
+    parser_auth.add_argument('--port', '-p', type=int,
+                             default=8080, help='Port')
+    parser_auth.add_argument('--client-id', '-i',
+                             type=int, required=True, help='Strava Client Id')
+    parser_auth.add_argument('--client-secret', '-s',
+                             required=True, help='Strava Client Secret')
+    parser_auth.set_defaults(func=authenticate)
 
     parser_store_token = subparsers.add_parser(
                           'store-token', help='Store authentication token')

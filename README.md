@@ -10,18 +10,19 @@ Command line interface for [Strava](http://www.strava.com). It allows:
 ```
 $ ./strava-cli.py -h
 usage: strava-cli.py [-h]
-                     {activities,details,update,bikes,clear-cache,store-token}
+                     {activities,details,update,bikes,clear-cache,authenticate,store-token}
                      ...
 
 Strava Command Line Interface
 
 positional arguments:
-  {activities,details,update,bikes,clear-cache,store-token}
+  {activities,details,update,bikes,clear-cache,authenticate,store-token}
     activities          List activities according to specified filters
     details             Retrieves the details of one or more activities
     update              Update one or more activities
     bikes               Retrieve bikes
     clear-cache         Clear the cache
+    authenticate        Authenticate using a client secret and client id
     store-token         Store authentication token
 
 optional arguments:
@@ -35,7 +36,12 @@ Strava uses a 3-legged OAuth flow in order to allow the application to access us
 To obtain an access token:
 
 * Obtain a client id and a client secret from Strava
-* Execute `strava-get-token.py` passing the client id and client secret. Point a web browser to `http://localhost:8080` (unless you've specified a different port with `--port`); it should be redirected to a page where Strava asks you to authorize the application. Once you've granted access to the application, Strava should send you back to local web server where a page will show the authentication token.
+* Execute
+
+  ```
+  $ ./strava-cli.py authenticate -i <client-id> -s <client-secret>
+  ```
+  Then navigate to `http://localhost:8080` (unless you've specified a different port with `--port`) using a web browser. You should be redirected to a page where Strava asks you to authorize the application. Once you've granted access to the application, Strava should send you back to local web server where a page will show the authentication token.
 
 To store the token on filesystem:
 
