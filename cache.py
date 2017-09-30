@@ -1,6 +1,7 @@
 import os
 import os.path
 import json
+import config
 
 
 class AbstractCache(object):
@@ -89,5 +90,4 @@ class JsonCache(AbstractCache):
 
 
 def get_cache():
-    return JsonCache(os.path.join(os.path.expanduser('~'), ".strava-cli"),
-                     'activities.json')
+    return JsonCache(config.get_strava_cli_dir(), 'activities.json')

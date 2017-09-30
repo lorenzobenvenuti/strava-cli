@@ -5,10 +5,22 @@ import repository
 import predicates
 import formatters
 import cache
+import token
+
+
+def get_token(args):
+    tkn = token.get_token_provider(args).get_token()
+    if tkn is None:
+        import sys
+        print ("No token specified - please"
+               "store a token using the store-token command or "
+               "set the STRAVA_TOKEN environment variable")
+        sys.exit(1)
+    return tkn
 
 
 def list_activities(args):
-    r = repository.get_repository(args.token)
+    r = repository.get_repository(get_token(args))
     p = predicates.get_predicate_from_filters(args.filter)
     f = formatters.get_formatter(args.quiet)
     for activity in r.get_activities():
@@ -27,7 +39,7 @@ def get_update_data(args):
 
 
 def update_activities(args):
-    r = repository.get_repository(args.token)
+    r = repository.get_repository(get_token(args))
     data = get_update_data(args)
     for id in args.id:
         r.update_activity(int(id), data)
@@ -38,7 +50,7 @@ def activities_details(args):
 
 
 def list_bikes(args):
-    r = repository.get_repository(args.token)
+    r = repository.get_repository(get_token(args))
     for bike in r.get_bikes():
         print '{id:<20} {name:<20}'.format(**bike)
 
@@ -47,11 +59,13 @@ def clear_cache(args):
     cache.get_cache().clear()
 
 
+def store_token(args):
+    token.get_token_store(args).store_token(args.token)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         description='Strava Command Line Interface')
-    parser.add_argument('--token', '-t',
-                        required=True, help='Strava API access token')
     subparsers = parser.add_subparsers()
 
     parser_list = subparsers.add_parser('activities', help='List activities '
@@ -82,5 +96,11 @@ if __name__ == "__main__":
                                                help='Clear the cache')
     parser_clear_cache.set_defaults(func=clear_cache)
 
+    parser_store_token = subparsers.add_parser(
+                          'store-token', help='Store authentication token')
+    parser_store_token.set_defaults(func=store_token)
+    parser_store_token.add_argument('token', help='Authentication token')
+
     args = parser.parse_args()
+
     args.func(args)
