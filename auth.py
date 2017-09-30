@@ -45,7 +45,7 @@ class Authorizer(object):
 
     def get_token(self):
         if 'error' in request.args:
-            return "Access denied"
+            return abort(401)
         if 'code' in request.args:
             response = requests.post(Authorizer.TOKEN_URL, data={
                 'client_id': self._client_id,
@@ -55,7 +55,7 @@ class Authorizer(object):
             if 'access_token' in d:
                 return "Access token is: {}".format(d['access_token'])
             return "An error occurred retrieving access token; "\
-                "please check your client id and client secret"
+                "please check your client id and client secret."
         abort(404)
 
     def authorize(self, client_id, client_secret):
@@ -66,6 +66,7 @@ class Authorizer(object):
         app.add_url_rule('/token', 'get_token', self.get_token)
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        print "Navigate to http://localhost:{} using your web browser".format(
-                self._port)
+        print ("Navigate to http://localhost:{} using your web browser and "
+               "perform the authorization flow.\n"
+               "Press CTRL-C to abort".format(self._port))
         app.run(port=self._port)
