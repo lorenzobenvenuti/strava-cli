@@ -81,11 +81,19 @@ class CachedRepository(AbstractRepository):
     def _update_cache(self):
         activities = self._cache.get_activities()
         timestamp = self._get_latest_timestamp(activities)
-        new_activities = self._client.get_activities_after(timestamp)
+        new_activities = []
+        page = 1
+        per_page = 30
+        while True:
+            curr_activities = self._client.get_activities_after(timestamp, page, per_page)
+            page += 1
+            new_activities.extend(curr_activities)
+            if len(curr_activities) < per_page:
+                break
+        new_activities.reverse()
         self._cache.update_activities(new_activities + activities)
 
     def get_activities(self):
-        activities = self._cache.get_activities()
         if not self._cache.is_initialized():
             self._init_cache()
         else:

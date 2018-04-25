@@ -36,7 +36,7 @@ class BeforePredicate(DatePredicate):
         return self._parse_date(value) < self._date
 
 
-class BoolPredicate(Predicate):
+class EqPredicate(Predicate):
 
     def __init__(self, name, value):
         self._name = name
@@ -107,9 +107,11 @@ def get_predicate(name, value):
     if name == "after":
         return AfterPredicate(parse_date(value))
     if name == "trainer":
-        return BoolPredicate('trainer', parse_bool(value))
+        return EqPredicate('trainer', parse_bool(value))
+    if name == "type":
+        return EqPredicate('type', value)
     if name == "private":
-        return BoolPredicate('private', parse_bool(value))
+        return EqPredicate('private', parse_bool(value))
     if name == "distance":
         min_value, max_value = parse_range(value)
         return RangePredicate('distance', min_value, max_value)
