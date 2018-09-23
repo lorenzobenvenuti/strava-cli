@@ -1,6 +1,7 @@
 import time
 import datetime
 import util
+import logging
 
 
 class Predicate(object):
@@ -129,6 +130,7 @@ def get_predicate_from_filters(items):
         try:
             key, value = item.split("=", 1)
             predicates.append(get_predicate(key, value))
-        except ValueError:
+        except ValueError as e:
+            logging.getLogger("get_predicate_from_filters").exception(e)
             raise ValueError("Invalid value {}".format(item))
     return AndPredicate(predicates)

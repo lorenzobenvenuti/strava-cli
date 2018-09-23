@@ -3,6 +3,7 @@ import json
 import time
 from util import parse_date
 import cache
+import logging
 
 
 class AbstractRepository(object):
@@ -75,20 +76,30 @@ class CachedRepository(AbstractRepository):
         return time.mktime(max_date.timetuple())
 
     def _init_cache(self):
+        logging.getLogger('CachedRepository').debug("Initializing cache")
         activities = self.get_all_activities()
         self._cache.update_activities(activities)
 
     def _update_cache(self):
         activities = self._cache.get_activities()
         timestamp = self._get_latest_timestamp(activities)
+        logging.getLogger('CachedRepository').debug(
+                            "Newest activity in cache {}".format(timestamp))
         new_activities = []
         page = 1
         per_page = 30
         while True:
-            curr_activities = self._client.get_activities_after(timestamp, page, per_page)
+            logging.getLogger('CachedRepository').info(
+                    "Loading page {} of {} elements".format(page, per_page))
+            curr_activities = self._client.get_activities_after(
+                                                timestamp, page, per_page)
+            logging.getLogger('CachedRepository').debug(
+                    "{} activities loaded".format(len(curr_activities)))
             page += 1
             new_activities.extend(curr_activities)
             if len(curr_activities) < per_page:
+                logging.getLogger('CachedRepository').debug(
+                                            "No more activities to load")
                 break
         new_activities.reverse()
         self._cache.update_activities(new_activities + activities)
@@ -110,6 +121,8 @@ class CachedRepository(AbstractRepository):
                 activity[k] = v
 
     def update_activity(self, id, data):
+        logging.getLogger('CachedRepository').info(
+                    "Updating activity {} with data {}".format(id, data))
         self._client.update_activity(id, **data)
         activity = self._cache.get_activity(id)
         if activity is not None:

@@ -2,14 +2,25 @@
 
 import auth
 import argparse
+import config
 import repository
 import predicates
 import formatters
 import cache
 import authtoken
+import logging
+
+
+logging.basicConfig(
+    filename=config.get_log_file(),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG
+)
+
 
 def print_utf8(value):
     print value.encode('utf-8')
+
 
 def authenticate(args):
     a = auth.Authorizer(args.port)
@@ -19,10 +30,11 @@ def authenticate(args):
 def get_token(args):
     tkn = authtoken.get_token_provider(args).get_token()
     if tkn is None:
+        logging.getLogger('get_token').error("No token specified - aborting")
         import sys
         print_utf8("No token specified - please"
-               "store a token using the store-token command or "
-               "set the STRAVA_TOKEN environment variable")
+                   "store a token using the store-token command or "
+                   "set the STRAVA_TOKEN environment variable")
         sys.exit(1)
     return tkn
 
@@ -64,6 +76,7 @@ def list_bikes(args):
 
 
 def clear_cache(args):
+    logging.getLogger('clear_cache').info("Clearing cache")
     cache.get_cache().clear()
 
 
