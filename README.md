@@ -1,6 +1,6 @@
 # strava-cli
 
-Command line interface for [Strava](http://www.strava.com). It allows:
+Command line interface for [Strava](http://www.strava.com). It allows to:
 
 * Retrieve infomations and stats about your activities matching certain criteria
 * Bulk update activities
