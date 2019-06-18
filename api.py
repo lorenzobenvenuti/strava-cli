@@ -12,13 +12,13 @@ class Client(object):
     def _get(self, url):
         r = requests.get(url, headers=self._get_headers())
         if r.status_code != 200:
-            raise StandardError()
+            raise ValueError(r.text)
         return r.json()
 
     def _put(self, url, data):
         r = requests.put(url, data, headers=self._get_headers())
         if r.status_code != 200:
-            raise StandardError()
+            raise ValueError()
 
     def update_activity(self, id, **kwargs):
         self._put("https://www.strava.com/api/v3/activities/{}".format(id),

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import auth
 import argparse
@@ -19,7 +19,7 @@ logging.basicConfig(
 
 
 def print_utf8(value):
-    print value.encode('utf-8')
+    print(value)
 
 
 def authenticate(args):
