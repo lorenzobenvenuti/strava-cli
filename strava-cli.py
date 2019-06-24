@@ -18,10 +18,6 @@ logging.basicConfig(
 )
 
 
-def print_utf8(value):
-    print(value)
-
-
 def authenticate(args):
     a = auth.Authorizer(args.port)
     a.authorize(args.client_id, args.client_secret)
@@ -32,7 +28,7 @@ def get_token(args):
     if tkn is None:
         logging.getLogger('get_token').error("No token specified - aborting")
         import sys
-        print_utf8("No token specified - please"
+        print("No token specified - please"
                    "store a token using the store-token command or "
                    "set the STRAVA_TOKEN environment variable")
         sys.exit(1)
@@ -45,7 +41,7 @@ def list_activities(args):
     f = formatters.get_formatter(args.quiet, args.json)
     for activity in r.get_activities():
         if p.matches(activity):
-            print_utf8(f.format(activity))
+            print(f.format(activity))
 
 
 def get_update_data(args):
@@ -72,7 +68,7 @@ def activities_details(args):
 def list_bikes(args):
     r = repository.get_repository(get_token(args))
     for bike in r.get_bikes():
-        print_utf8('{id:<20} {name:<20}'.format(**bike))
+        print('{id:<20} {name:<20}'.format(**bike))
 
 
 def clear_cache(args):
