@@ -76,6 +76,8 @@ class AndPredicate(Predicate):
 
 
 def parse_date(date_str):
+    # TODO: change start of year (or month) to end of year (or month) according
+    # to date usage (begin/end of an interval)?
     if len(date_str) == 4:
         date_str += "0101"
     elif len(date_str) == 6:
