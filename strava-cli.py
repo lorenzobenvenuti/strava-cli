@@ -42,7 +42,7 @@ def get_token(args):
 def list_activities(args):
     r = repository.get_repository(get_token(args))
     p = predicates.get_predicate_from_filters(args.filter)
-    f = formatters.get_formatter(args.quiet)
+    f = formatters.get_formatter(args.quiet, args.json)
     for activity in r.get_activities():
         if p.matches(activity):
             print_utf8(f.format(activity))
@@ -95,6 +95,8 @@ if __name__ == "__main__":
                              help='Adds a filter to the query')
     parser_list.add_argument('--quiet', '-q', action='store_true',
                              help='Prints only activity identifiers')
+    parser_list.add_argument('--json', '-j', action='store_true',
+                             help='Output in JSON format')
     parser_list.set_defaults(func=list_activities)
 
     parser_details = subparsers.add_parser('details', help='Retrieves the '

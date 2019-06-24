@@ -66,7 +66,7 @@ class Authorizer(object):
         app.add_url_rule('/token', 'get_token', self.get_token)
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        print ("Navigate to http://localhost:{} using your web browser and "
-               "perform the authorization flow.\n"
-               "Press CTRL-C to abort".format(self._port))
+        print("Navigate to http://localhost:{} using your web browser and "
+              "perform the authorization flow.\n"
+              "Press CTRL-C to abort".format(self._port))
         app.run(port=self._port)
