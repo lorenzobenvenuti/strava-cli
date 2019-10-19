@@ -7,7 +7,6 @@ import repository
 import predicates
 import formatters
 import cache
-import authtoken
 import logging
 
 
@@ -19,16 +18,16 @@ logging.basicConfig(
 
 
 def authenticate(args):
-    a = auth.Authorizer(args.port)
+    a = auth.authorizer(args.port)
     a.authorize(args.client_id, args.client_secret)
 
 
 def get_token(args):
-    tkn = authtoken.get_token_provider(args).get_token()
+    tkn = auth.access_token_provider().get_access_token()
     if tkn is None:
         logging.getLogger('get_token').error("No token specified - aborting")
         import sys
-        print("No token specified - please"
+        print("No token specified - please "
                    "store a token using the store-token command or "
                    "set the STRAVA_TOKEN environment variable")
         sys.exit(1)
@@ -76,10 +75,6 @@ def clear_cache(args):
     cache.get_cache().clear()
 
 
-def store_token(args):
-    authtoken.get_token_store(args).store_token(args.token)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         description='Strava Command Line Interface')
@@ -124,11 +119,6 @@ if __name__ == "__main__":
     parser_auth.add_argument('--client-secret', '-s',
                              required=True, help='Strava Client Secret')
     parser_auth.set_defaults(func=authenticate)
-
-    parser_store_token = subparsers.add_parser(
-                          'store-token', help='Store authentication token')
-    parser_store_token.set_defaults(func=store_token)
-    parser_store_token.add_argument('token', help='Authentication token')
 
     args = parser.parse_args()
 

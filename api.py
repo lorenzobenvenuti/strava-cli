@@ -32,7 +32,8 @@ class Client(object):
     def get_activities_after(self, seconds_from_epoch, page, per_page):
         activities = self._get(
             "https://www.strava.com/api/v3/athlete/activities" +
-            "?after={}&page={}&per_page={}".format(seconds_from_epoch, page, per_page))
+            "?after={}&page={}&per_page={}".format(
+                                        seconds_from_epoch, page, per_page))
         return activities
 
     def get_activity(self, id):
