@@ -23,7 +23,6 @@ positional arguments:
     bikes               Retrieve bikes
     clear-cache         Clear the cache
     authenticate        Authenticate using a client secret and client id
-    store-token         Store authentication token
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -41,15 +40,9 @@ To obtain an access token:
   ```
   $ ./strava-cli.py authenticate -i <client-id> -s <client-secret>
   ```
-  Then navigate to `http://localhost:8080` (unless you've specified a different port with `--port`) using a web browser. You should be redirected to a page where Strava asks you to authorize the application. Once you've granted access to the application, Strava should send you back to local web server where a page will show the authentication token.
+  Then navigate to `http://localhost:8080` (unless you've specified a different port with `--port`) using a web browser. You should be redirected to a page where Strava asks you to authorize the application. Once you've granted access to the application, Strava should send you back to local web server where a page should show a confirm that token has been stored.
+  Please notice that **client id, client secret, access token and refresh token will be saved in your home directory in plain text**. This is necessary to refresh the access token automatically without having to re-login every time the access token expires.
 
-To store the token on filesystem:
-
-```
-$ ./strava-cli.py store-token <token>
-```
-
-Alternatively you can set the environment variable `STRAVA_TOKEN`.
 
 ### Retrieving activities
 
