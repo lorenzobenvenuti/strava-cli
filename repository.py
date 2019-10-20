@@ -6,22 +6,7 @@ import cache
 import logging
 
 
-class AbstractRepository(object):
-
-    def get_activities(self):
-        raise NotImplementedError()
-
-    def update_activity(self, id, values):
-        raise NotImplementedError()
-
-    def get_bikes(self):
-        raise NotImplementedError()
-
-    def update_activity(self, id, data):
-        raise NotImplementedError()
-
-
-class ApiRepository(AbstractRepository):
+class ApiRepository:
 
     page_size = 30
 
@@ -45,11 +30,15 @@ class ApiRepository(AbstractRepository):
         athlete = self._client.get_athlete()
         return athlete["bikes"]
 
+    def get_shoes(self):
+        athlete = self._client.get_athlete()
+        return athlete["shoes"]
+
     def update_activity(self, id, data):
         self._client.update_activity(id, **data)
 
 
-class CachedRepository(AbstractRepository):
+class CachedRepository:
 
     page_size = 30
 
@@ -114,6 +103,10 @@ class CachedRepository(AbstractRepository):
     def get_bikes(self):
         athlete = self._client.get_athlete()
         return athlete["bikes"]
+
+    def get_shoes(self):
+        athlete = self._client.get_athlete()
+        return athlete["shoes"]
 
     def _merge_activity(self, activity, data):
         for k, v in data.items():

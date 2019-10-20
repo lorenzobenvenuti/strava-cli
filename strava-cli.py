@@ -68,6 +68,12 @@ def list_bikes(args):
         print('{id:<20} {name:<20}'.format(**bike))
 
 
+def list_shoes(args):
+    r = repository.get_repository(get_token(args))
+    for shoe in r.get_shoes():
+        print('{id:<20} {name:<20}'.format(**shoe))
+
+
 def clear_cache(args):
     logging.getLogger('clear_cache').info("Clearing cache")
     cache.get_cache().clear()
@@ -103,6 +109,9 @@ if __name__ == "__main__":
 
     parser_bikes = subparsers.add_parser('bikes', help='Retrieve bikes')
     parser_bikes.set_defaults(func=list_bikes)
+
+    parser_shoes = subparsers.add_parser('shoes', help='Retrieve shoes')
+    parser_shoes.set_defaults(func=list_shoes)
 
     parser_clear_cache = subparsers.add_parser('clear-cache',
                                                help='Clear the cache')

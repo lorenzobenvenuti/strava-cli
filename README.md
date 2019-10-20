@@ -21,6 +21,7 @@ positional arguments:
     details             Retrieves the details of one or more activities
     update              Update one or more activities
     bikes               Retrieve bikes
+    shoes               Retrieve shoes
     clear-cache         Clear the cache
     authenticate        Authenticate using a client secret and client id
 
@@ -142,6 +143,10 @@ $ ./strava-cli.py update -s private=true $(./strava-cli.py -t <token> activities
 
 ```
 $ ./strava-cli.py bikes
+```
+
+```
+$ ./strava-cli.py shoes
 ```
 
 ## TODO
