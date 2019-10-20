@@ -16,8 +16,9 @@ class QuietFormatter(Formatter):
 class DefaultFormatter(Formatter):
 
     def format(self, activity):
-        return u"{id}\t{type}\t{start_date_local}\t{name}\t{moving_time}\t{distance}\t{total_elevation_gain}"\
-                .format(**activity)
+        return (u"{id}\t{type}\t{start_date_local}\t{name}\t{moving_time}"
+                "\t{distance}\t{total_elevation_gain}"
+                .format(**activity))
 
 
 class JsonFormatter(Formatter):

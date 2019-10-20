@@ -27,9 +27,7 @@ def get_token(args):
     if tkn is None:
         logging.getLogger('get_token').error("No token specified - aborting")
         import sys
-        print("No token specified - please "
-                   "store a token using the store-token command or "
-                   "set the STRAVA_TOKEN environment variable")
+        print("Cannot find a token - please authenticate")
         sys.exit(1)
     return tkn
 

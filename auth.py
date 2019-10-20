@@ -54,17 +54,9 @@ class Authorizer:
         if 'error' in request.args:
             return abort(401)
         if 'code' in request.args:
-            response = requests.post(Authorizer.TOKEN_URL, data={
-                'client_id': self._client_id,
-                'client_secret': self._client_secret,
-                'code': request.args['code'],
-                'grant_type': 'authorization_code'
-            })
-            d = response.json()
-            if 'access_token' in d:
-                auth = {k: d[k] for k in Authorizer.KEYS}
-                auth['client_id'] = self._client_id
-                auth['client_secret'] = self._client_secret
+            refresher = TokenRefresher(self._client_id, self._client_secret)
+            auth = refresher.refresh(code=request.args['code'])
+            if auth:
                 self._store.save_auth(auth)
                 return "Token successfully stored"
             return "An error occurred retrieving access token; "\
@@ -85,6 +77,44 @@ class Authorizer:
         app.run(port=self._port)
 
 
+class TokenRefresher:
+
+    TOKEN_URL = 'https://www.strava.com/oauth/token'
+    REFRESH_TOKEN = 'refresh_token'
+    ACCESS_TOKEN = 'access_token'
+    EXPIRES_AT = 'expires_at'
+    CLIENT_ID = 'client_id'
+    CLIENT_SECRET = 'client_secret'
+    GRANT_TYPE = 'grant_type'
+    CODE = 'code'
+    AUTHORIZATION_CODE = 'authorization_code'
+    KEYS = (EXPIRES_AT, REFRESH_TOKEN, ACCESS_TOKEN)
+
+    def __init__(self, client_id, client_secret):
+        self._client_id = client_id
+        self._client_secret = client_secret
+
+    def refresh(self, code=None, refresh_token=None):
+        if code and refresh_token:
+            raise ValueError("Choose one between code and refresh_token")
+        data = {}
+        data[TokenRefresher.CLIENT_ID] = self._client_id
+        data[TokenRefresher.CLIENT_SECRET] = self._client_secret
+        data[TokenRefresher.GRANT_TYPE] = TokenRefresher.AUTHORIZATION_CODE
+        if refresh_token:
+            data[TokenRefresher.REFRESH_TOKEN] = refresh_token
+        if code:
+            data[TokenRefresher.CODE] = code
+        response = requests.post(TokenRefresher.TOKEN_URL, data=data)
+        d = response.json()
+        if TokenRefresher.ACCESS_TOKEN in d:
+            auth = {k: d[k] for k in TokenRefresher.KEYS}
+            auth[TokenRefresher.CLIENT_ID] = self._client_id
+            auth[TokenRefresher.CLIENT_SECRET] = self._client_secret
+            return auth
+        return None
+
+
 class AccessTokenProvider:
 
     def __init__(self, store):
@@ -92,20 +122,15 @@ class AccessTokenProvider:
 
     def get_access_token(self):
         auth = self._store.load_auth()
-        if time.time() < auth['expires_at']:
-            return auth['access_token']
-        response = requests.post(Authorizer.TOKEN_URL, data={
-            'client_id': auth['client_id'],
-            'client_secret': auth['client_secret'],
-            'refresh_token': auth['refresh_token'],
-            'grant_type': 'authorization_code'
-        })
-        d = response.json()
-        auth['refresh_token'] = d['refresh_token']
-        auth['access_token'] = d['access_token']
-        auth['expires_at'] = d['expires_at']
+        if time.time() < auth[TokenRefresher.EXPIRES_AT]:
+            return auth[TokenRefresher.ACCESS_TOKEN]
+        refresher = TokenRefresher(self._client_id, self._client_secret)
+        auth = refresher.refresh(
+                            refresh_token=auth[TokenRefresher.REFRESH_TOKEN])
+        if not auth:
+            return None
         self._store.save_auth(auth)
-        return auth['access_token']
+        return auth[TokenRefresher.ACCESS_TOKEN]
 
 
 def auth_store():
