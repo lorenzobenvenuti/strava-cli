@@ -35,7 +35,7 @@ class Authorizer:
 
     AUTH_URL_TEMPLATE = 'https://www.strava.com/oauth/authorize?client_id={}'\
         '&response_type=code&redirect_uri=http://localhost:{}/token'\
-        '&scope=activity:read_all,activity:write'
+        '&scope=activity:read_all,activity:write,profile:read_all'
 
     TOKEN_URL = 'https://www.strava.com/oauth/token'
 
