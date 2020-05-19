@@ -100,7 +100,7 @@ class TokenRefresher:
         data = {}
         data[TokenRefresher.CLIENT_ID] = self._client_id
         data[TokenRefresher.CLIENT_SECRET] = self._client_secret
-        data[TokenRefresher.GRANT_TYPE] = TokenRefresher.AUTHORIZATION_CODE
+        data[TokenRefresher.GRANT_TYPE] = TokenRefresher.AUTHORIZATION_CODE if code else TokenRefresher.REFRESH_TOKEN
         if refresh_token:
             data[TokenRefresher.REFRESH_TOKEN] = refresh_token
         if code:
@@ -124,7 +124,7 @@ class AccessTokenProvider:
         auth = self._store.load_auth()
         if time.time() < auth[TokenRefresher.EXPIRES_AT]:
             return auth[TokenRefresher.ACCESS_TOKEN]
-        refresher = TokenRefresher(self._client_id, self._client_secret)
+        refresher = TokenRefresher(auth[TokenRefresher.CLIENT_ID], auth[TokenRefresher.CLIENT_SECRET])
         auth = refresher.refresh(
                             refresh_token=auth[TokenRefresher.REFRESH_TOKEN])
         if not auth:
