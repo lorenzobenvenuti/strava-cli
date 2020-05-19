@@ -82,6 +82,7 @@ def clear_cache(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         description='Strava Command Line Interface')
+    parser.set_defaults(func=lambda args: parser.print_help())
     subparsers = parser.add_subparsers()
 
     parser_list = subparsers.add_parser('activities', help='List activities '
