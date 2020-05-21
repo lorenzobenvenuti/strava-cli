@@ -1,6 +1,5 @@
 import api
 import json
-import time
 from util import parse_date
 import cache
 import logging
@@ -63,7 +62,7 @@ class CachedRepository:
         if not activities:
             return 0
         max_date = max([parse_date(a['start_date_local']) for a in activities])
-        return time.mktime(max_date.timetuple())
+        return int(max_date.timestamp())
 
     def _init_cache(self):
         logging.getLogger('CachedRepository').debug("Initializing cache")
