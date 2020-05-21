@@ -10,15 +10,16 @@ Command line interface for [Strava](http://www.strava.com). It allows to:
 ```
 $ ./strava-cli.py -h
 usage: strava-cli.py [-h]
-                     {activities,details,update,bikes,clear-cache,authenticate,store-token}
+                     {activities,details,gps,update,bikes,shoes,clear-cache,authenticate}
                      ...
 
 Strava Command Line Interface
 
 positional arguments:
-  {activities,details,update,bikes,clear-cache,authenticate,store-token}
+  {activities,details,gps,update,bikes,shoes,clear-cache,authenticate}
     activities          List activities according to specified filters
     details             Retrieves the details of one or more activities
+    gps                 Retrieves the gps file of one or more activities
     update              Update one or more activities
     bikes               Retrieve bikes
     shoes               Retrieve shoes
@@ -43,7 +44,6 @@ To obtain an access token:
   ```
   Then navigate to `http://localhost:8080` (unless you've specified a different port with `--port`) using a web browser. You should be redirected to a page where Strava asks you to authorize the application. Once you've granted access to the application, Strava should send you back to local web server where a page should show a confirm that token has been stored.
   Please notice that **client id, client secret, access token and refresh token will be saved in your home directory in plain text**. This is necessary to refresh the access token automatically without having to re-login every time the access token expires.
-
 
 ### Retrieving activities
 
@@ -102,10 +102,25 @@ $ ./strava-cli.py activities -f before=20161231 -f after=20160101 -f  elevation=
 
 ```
 
-
 ### Retrieving activity details
 
-TODO
+```
+$ ./strava-cli.py details <activity-id>
+```
+
+### Retrieving GPS track
+
+To print the track to stdout in GPX format:
+
+```
+$ ./strava-cli.py gps <activity-id>
+```
+
+Instead, if you want to retrieve the track in JSON format:
+
+```
+$ ./strava-cli.py gps -j <activity-id>
+```
 
 ### Updating activities
 
@@ -152,7 +167,6 @@ $ ./strava-cli.py shoes
 ## TODO
 
 * Support `--format` option to format output
-* Implement activity detail
 * Implement filter for activity title
 * Implement command for total distance and climb
 * Performance: flush the cache just once
