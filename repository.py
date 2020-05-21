@@ -6,6 +6,7 @@ import cache
 import logging
 
 
+#unused
 class ApiRepository:
 
     page_size = 30
@@ -99,6 +100,13 @@ class CachedRepository:
         else:
             self._update_cache()
         return self._cache.get_activities()
+
+    def get_activity(self, id):
+        if not self._cache.is_initialized():
+            self._init_cache()
+        else:
+            self._update_cache()
+        return self._cache.get_activity(id)
 
     def get_bikes(self):
         athlete = self._client.get_athlete()
