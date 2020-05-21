@@ -42,9 +42,10 @@ class CachedRepository:
 
     page_size = 30
 
-    def __init__(self, token, cache):
+    def __init__(self, token, cache, update_cache = True):
         self._client = api.Client(token)
         self._cache = cache
+        self._run_update_cache = update_cache
 
     def get_all_activities(self):
         all_activities = []
@@ -70,6 +71,11 @@ class CachedRepository:
         self._cache.update_activities(activities)
 
     def _update_cache(self):
+        if not self._cache.is_initialized():
+            self._init_cache()
+            return
+        if not self._run_update_cache:
+            return
         activities = self._cache.get_activities()
         timestamp = self._get_latest_timestamp(activities)
         logging.getLogger('CachedRepository').debug(
@@ -94,17 +100,11 @@ class CachedRepository:
         self._cache.update_activities(new_activities + activities)
 
     def get_activities(self):
-        if not self._cache.is_initialized():
-            self._init_cache()
-        else:
-            self._update_cache()
+        self._update_cache()
         return self._cache.get_activities()
 
     def get_activity(self, id):
-        if not self._cache.is_initialized():
-            self._init_cache()
-        else:
-            self._update_cache()
+        self._update_cache()
         return self._cache.get_activity(id)
 
     def get_gps(self, id):
@@ -137,5 +137,5 @@ class CachedRepository:
             self._cache.update_activity(activity)
 
 
-def get_repository(token):
-    return CachedRepository(token, cache.get_cache())
+def get_repository(token, update_cache = True):
+    return CachedRepository(token, cache.get_cache(), update_cache)

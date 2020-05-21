@@ -33,7 +33,7 @@ def get_token(args):
 
 
 def list_activities(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), args.update_cache)
     p = predicates.get_predicate_from_filters(args.filter)
     f = formatters.get_formatter(args.json, args.quiet, args.verbose)
     for activity in r.get_activities():
@@ -62,7 +62,7 @@ def update_activities(args):
 
 
 def activities_details(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), args.update_cache)
     f = formatters.get_formatter_details(args.json, args.quiet, args.verbose)
     for id in args.id:
         if not id.isdigit():
@@ -73,7 +73,7 @@ def activities_details(args):
 
 
 def activities_gps(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), args.update_cache)
     f = formatters.get_formatter_gps(args.json)
     for id in args.id:
         if not id.isdigit():
@@ -115,6 +115,8 @@ if __name__ == "__main__":
                              help='Output in JSON format')
     parser_list.add_argument('--verbose', '-v', action='store_true',
                              help='Prints more information about the activity')
+    parser_list.add_argument('--update-cache', '-c', type=lambda s: s.lower() in ['true', 'yes'], default=True,
+                             help='Update the internal cache.  This is the default.')
     parser_list.set_defaults(func=list_activities)
 
     parser_details = subparsers.add_parser('details', help='Retrieves the '
@@ -125,6 +127,8 @@ if __name__ == "__main__":
                              help='Output in JSON format')
     parser_details.add_argument('--verbose', '-v', action='store_true',
                              help='Prints more information about the activity')
+    parser_details.add_argument('--update-cache', '-c', type=lambda s: s.lower() in ['true', 'yes'], default=True,
+                             help='Update the internal cache.  This is the default.')
     parser_details.add_argument('id',
                                 nargs='+', help='Activity id(s)')
     parser_details.set_defaults(func=activities_details)
@@ -135,6 +139,8 @@ if __name__ == "__main__":
                              help='Output in JSON format')
     parser_gps.add_argument('id',
                                 nargs='+', help='Activity id(s)')
+    parser_gps.add_argument('--update-cache', '-c', type=lambda s: s.lower() in ['true', 'yes'], default=True,
+                             help='Update the internal cache.  This is the default.')
     parser_gps.set_defaults(func=activities_gps)
 
     parser_update = subparsers.add_parser('update',
