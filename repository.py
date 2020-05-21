@@ -1,11 +1,11 @@
 import api
 import json
-import time
 from util import parse_date
 import cache
 import logging
 
 
+#unused
 class ApiRepository:
 
     page_size = 30
@@ -61,8 +61,8 @@ class CachedRepository:
     def _get_latest_timestamp(self, activities):
         if not activities:
             return 0
-        max_date = max([parse_date(a['start_date_local']) for a in activities])
-        return time.mktime(max_date.timetuple())
+        max_date = max([parse_date(a['start_date']) for a in activities])
+        return int(max_date.timestamp())
 
     def _init_cache(self):
         logging.getLogger('CachedRepository').debug("Initializing cache")
@@ -99,6 +99,20 @@ class CachedRepository:
         else:
             self._update_cache()
         return self._cache.get_activities()
+
+    def get_activity(self, id):
+        if not self._cache.is_initialized():
+            self._init_cache()
+        else:
+            self._update_cache()
+        return self._cache.get_activity(id)
+
+    def get_gps(self, id):
+        streams = self._client.get_streams(id)
+        activity = self.get_activity(int(id))
+        start_time = int(parse_date(activity['start_date']).timestamp())
+        streams = zip(*(streams[key]['data'] for key in ('time', 'latlng', 'altitude')))
+        return activity, [(time + start_time, point, altitude) for time, point, altitude in streams]
 
     def get_bikes(self):
         athlete = self._client.get_athlete()

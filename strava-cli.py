@@ -35,7 +35,7 @@ def get_token(args):
 def list_activities(args):
     r = repository.get_repository(get_token(args))
     p = predicates.get_predicate_from_filters(args.filter)
-    f = formatters.get_formatter(args.quiet, args.json)
+    f = formatters.get_formatter(args.json, args.quiet, args.verbose)
     for activity in r.get_activities():
         if p.matches(activity):
             print(f.format(activity))
@@ -55,11 +55,31 @@ def update_activities(args):
     r = repository.get_repository(get_token(args))
     data = get_update_data(args)
     for id in args.id:
+        if not id.isdigit():
+            print('activity {} needs to be a number'.format(id))
+            continue
         r.update_activity(int(id), data)
 
 
 def activities_details(args):
-    raise NotImplementedError
+    r = repository.get_repository(get_token(args))
+    f = formatters.get_formatter_details(args.json, args.quiet, args.verbose)
+    for id in args.id:
+        if not id.isdigit():
+            print('activity {} needs to be a number'.format(id))
+            continue
+        activity = r.get_activity(int(id))
+        print(f.format(activity) if activity is not None else 'activity {} not found'.format(id))
+
+
+def activities_gps(args):
+    r = repository.get_repository(get_token(args))
+    f = formatters.get_formatter_gps(args.json)
+    for id in args.id:
+        if not id.isdigit():
+            print('activity {} needs to be a number'.format(id))
+            continue
+        print(f.format(*r.get_gps(int(id))))
 
 
 def list_bikes(args):
@@ -93,13 +113,29 @@ if __name__ == "__main__":
                              help='Prints only activity identifiers')
     parser_list.add_argument('--json', '-j', action='store_true',
                              help='Output in JSON format')
+    parser_list.add_argument('--verbose', '-v', action='store_true',
+                             help='Prints more information about the activity')
     parser_list.set_defaults(func=list_activities)
 
     parser_details = subparsers.add_parser('details', help='Retrieves the '
                                            'details of one or more activities')
+    parser_details.add_argument('--quiet', '-q', action='store_true',
+                             help='Prints only activity identifiers')
+    parser_details.add_argument('--json', '-j', action='store_true',
+                             help='Output in JSON format')
+    parser_details.add_argument('--verbose', '-v', action='store_true',
+                             help='Prints more information about the activity')
     parser_details.add_argument('id',
                                 nargs='+', help='Activity id(s)')
     parser_details.set_defaults(func=activities_details)
+
+    parser_gps = subparsers.add_parser('gps', help='Retrieves the '
+                                           'gps file of one or more activities')
+    parser_gps.add_argument('--json', '-j', action='store_true',
+                             help='Output in JSON format')
+    parser_gps.add_argument('id',
+                                nargs='+', help='Activity id(s)')
+    parser_gps.set_defaults(func=activities_gps)
 
     parser_update = subparsers.add_parser('update',
                                           help='Update one or more activities')
