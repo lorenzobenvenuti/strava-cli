@@ -72,6 +72,16 @@ def activities_details(args):
         print(f.format(activity) if activity is not None else 'activity {} not found'.format(id))
 
 
+def activities_gps(args):
+    r = repository.get_repository(get_token(args))
+    f = formatters.get_formatter_gps(args.json)
+    for id in args.id:
+        if not id.isdigit():
+            print('activity {} needs to be a number'.format(id))
+            continue
+        print(f.format(*r.get_gps(int(id))))
+
+
 def list_bikes(args):
     r = repository.get_repository(get_token(args))
     for bike in r.get_bikes():
@@ -118,6 +128,14 @@ if __name__ == "__main__":
     parser_details.add_argument('id',
                                 nargs='+', help='Activity id(s)')
     parser_details.set_defaults(func=activities_details)
+
+    parser_gps = subparsers.add_parser('gps', help='Retrieves the '
+                                           'gps file of one or more activities')
+    parser_gps.add_argument('--json', '-j', action='store_true',
+                             help='Output in JSON format')
+    parser_gps.add_argument('id',
+                                nargs='+', help='Activity id(s)')
+    parser_gps.set_defaults(func=activities_gps)
 
     parser_update = subparsers.add_parser('update',
                                           help='Update one or more activities')

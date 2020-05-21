@@ -40,5 +40,9 @@ class Client(object):
         return self._get(
             "https://www.strava.com/api/v3/activities/{}".format(id))
 
+    def get_streams(self, id, stream_types = ['time','latlng','altitude']):
+        return self._get(
+            "https://www.strava.com/api/v3/activities/{}/streams?keys={}&key_by_type=true".format(id, ','.join(stream_types)))
+
     def get_athlete(self):
         return self._get("https://www.strava.com/api/v3/athlete")
