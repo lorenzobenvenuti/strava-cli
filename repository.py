@@ -61,7 +61,7 @@ class CachedRepository:
     def _get_latest_timestamp(self, activities):
         if not activities:
             return 0
-        max_date = max([parse_date(a['start_date_local']) for a in activities])
+        max_date = max([parse_date(a['start_date']) for a in activities])
         return int(max_date.timestamp())
 
     def _init_cache(self):
