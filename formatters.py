@@ -36,7 +36,10 @@ class DefaultFormatter(Formatter):
     def format(self, activity):
         output = ''
         for key in self.get_keys():
-            output += '{}\t'.format(activity.get(key, ''))
+            output_value = activity.get(key, '')
+            if key == 'start_date_local':
+                output_value = output_value.replace('Z','') #Z is incorrect here
+            output += '{}\t'.format(output_value)
         return output
 
 class DetailFormatter(Formatter):
@@ -45,7 +48,10 @@ class DetailFormatter(Formatter):
         output = '{}\n'.format(activity['id'])
         for key in self.get_keys():
             if key != 'id' and key in activity:
-                output += '{:>20}: {}'.format(key.replace('_', ' '), activity[key]) + '\n'
+                output_value = activity[key]
+                if key == 'start_date_local':
+                    output_value = output_value.replace('Z','') #Z is incorrect here
+                output += '{:>20}: {}'.format(key.replace('_', ' '), output_value) + '\n'
         return output
 
 class JsonFormatter(Formatter):

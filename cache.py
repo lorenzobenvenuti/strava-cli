@@ -2,6 +2,7 @@ import os
 import os.path
 import json
 import config
+import tempfile
 
 
 class AbstractCache(object):
@@ -29,18 +30,14 @@ class JsonCache(AbstractCache):
 
     def __init__(self, directory, file_name):
         self._dir = directory
-        self._file = file_name
+        self._file = os.path.join(directory, file_name)
         self._cache = None
 
     def _cache_file(self):
-        return os.path.join(self._dir, self._file)
+        return self._file
 
     def is_initialized(self):
-        if not os.path.exists(self._dir):
-            return False
-        if not os.path.exists(self._cache_file()):
-            return False
-        return True
+        return os.path.exists(self._cache_file())
 
     def _empty_cache(self):
         cache = {}
@@ -61,8 +58,12 @@ class JsonCache(AbstractCache):
     def _update_cache(self, cache):
         if not os.path.exists(self._dir):
             os.makedirs(self._dir)
-        with open(os.path.join(self._dir, self._file), 'w') as outfile:
+        with tempfile.NamedTemporaryFile(dir=self._dir, mode='w') as outfile:
             json.dump(cache, outfile)
+            #minor race case
+            if self.is_initialized():
+                os.remove(self._cache_file())
+            os.link(outfile.name, self._cache_file())
 
     def get_activities(self):
         return self._get_cache()['activities']
@@ -83,7 +84,7 @@ class JsonCache(AbstractCache):
         return next((a for a in self.get_activities() if a['id'] == id), None)
 
     def clear(self):
-        cache_file = os.path.join(self._dir, self._file)
+        cache_file = self._cache_file()
         if os.path.exists(cache_file):
             os.remove(cache_file)
         self._cache = {}
