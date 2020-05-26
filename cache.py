@@ -60,7 +60,9 @@ class JsonCache(AbstractCache):
             os.makedirs(self._dir)
         with tempfile.NamedTemporaryFile(dir=self._dir, mode='w') as outfile:
             json.dump(cache, outfile)
-            os.remove(self._cache_file()) #minor race case
+            #minor race case
+            if self.is_initialized():
+                os.remove(self._cache_file())
             os.link(outfile.name, self._cache_file())
 
     def get_activities(self):
