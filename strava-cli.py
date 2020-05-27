@@ -68,7 +68,7 @@ def activities_details(args):
         if not id.isdigit():
             print('activity {} needs to be a number'.format(id))
             continue
-        activity = r.get_activity(int(id))
+        activity = r.get_activity_detail(int(id))
         print(f.format(activity) if activity is not None else 'activity {} not found'.format(id))
 
 

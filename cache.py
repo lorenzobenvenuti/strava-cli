@@ -16,10 +16,13 @@ class AbstractCache(object):
     def update_activities(self, activities):
         raise NotImplementedError
 
-    def update_activity(self, activity):
+    def get_activity(self, id):
+        return next((activity for activity in self.get_activities() if activity['id'] == id), None)
+
+    def update_activity_detail(self, activity_detail):
         raise NotImplementedError
 
-    def get_activity(self, id):
+    def get_activity_detail(self, id):
         raise NotImplementedError
 
     def clear(self):
@@ -39,20 +42,17 @@ class JsonCache(AbstractCache):
     def is_initialized(self):
         return os.path.exists(self._cache_file())
 
-    def _empty_cache(self):
-        cache = {}
-        cache['activities'] = []
-        return cache
-
     def _load_cache_from_file(self):
         if not self.is_initialized():
-            return self._empty_cache()
+            return {}
         with open(self._cache_file()) as json_data:
             return json.load(json_data)
 
     def _get_cache(self):
         if self._cache is None:
             self._cache = self._load_cache_from_file()
+        self._cache.setdefault('activities', [])
+        self._cache.setdefault('activity_details', {})
         return self._cache
 
     def _update_cache(self, cache):
@@ -80,8 +80,13 @@ class JsonCache(AbstractCache):
                 a[k] = v
         self._update_cache(self._get_cache())
 
-    def get_activity(self, id):
-        return next((a for a in self.get_activities() if a['id'] == id), None)
+    def update_activity_detail(self, activity_detail):
+        cache = self._get_cache()
+        cache['activity_details'][activity_detail['id']] = activity_detail
+        self._update_cache(cache)
+
+    def get_activity_detail(self, id):
+        return self._get_cache()['activity_details'].get(str(id))
 
     def clear(self):
         cache_file = self._cache_file()

@@ -107,6 +107,13 @@ class CachedRepository:
         self._update_cache()
         return self._cache.get_activity(id)
 
+    def get_activity_detail(self, id):
+        activity_detail = self._cache.get_activity_detail(id)
+        if activity_detail is None:
+            activity_detail = self._client.get_activity_detail(id)
+            self._cache.update_activity_detail(activity_detail)
+        return activity_detail
+
     def get_gps(self, id):
         streams = self._client.get_streams(id)
         activity = self.get_activity(int(id))

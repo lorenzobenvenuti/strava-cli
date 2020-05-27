@@ -36,7 +36,7 @@ class Client(object):
                                         seconds_from_epoch, page, per_page))
         return activities
 
-    def get_activity(self, id):
+    def get_activity_detail(self, id):
         return self._get(
             "https://www.strava.com/api/v3/activities/{}".format(id))
 

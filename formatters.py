@@ -9,20 +9,11 @@ class Formatter(object):
         self._quiet = quiet
         self._verbose = verbose
 
-    def get_keys(self):
+    def _get_keys(self, activity):
         if self._quiet:
             return ('id',)
         elif self._verbose:
-            return ('id', 'external_id', 'upload_id', 'athlete', 'name',
-                    'distance', 'moving_time', 'elapsed_time',
-                    'total_elevation_gain', 'elev_high', 'elev_low', 'type',
-                    'start_date', 'start_date_local', 'timezone', 'start_latlng',
-                    'end_latlng', 'achievement_count', 'kudos_count', 'comment_count',
-                    'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer',
-                    'commute', 'manual', 'private', 'flagged', 'workout_type',
-                    'upload_id_str', 'average_speed', 'max_speed', 'has_kudoed',
-                    'gear_id', 'kilojoules', 'average_watts', 'device_watts', 'max_watts',
-                    'weighted_average_watts')
+            return sorted(activity.keys())
         else:
             return ('id', 'type', 'start_date_local', 'name',
                     'moving_time', 'distance', 'total_elevation_gain')
@@ -35,7 +26,7 @@ class DefaultFormatter(Formatter):
 
     def format(self, activity):
         output = ''
-        for key in self.get_keys():
+        for key in self._get_keys(activity):
             output_value = activity.get(key, '')
             if key == 'start_date_local':
                 output_value = output_value.replace('Z','') #Z is incorrect here
@@ -46,7 +37,7 @@ class DetailFormatter(Formatter):
 
     def format(self, activity):
         output = '{}\n'.format(activity['id'])
-        for key in self.get_keys():
+        for key in self._get_keys(activity):
             if key != 'id' and key in activity:
                 output_value = activity[key]
                 if key == 'start_date_local':
@@ -57,7 +48,7 @@ class DetailFormatter(Formatter):
 class JsonFormatter(Formatter):
 
     def format(self, activity):
-        return json.dumps({k: activity[k] for k in self.get_keys() if k in activity})
+        return json.dumps({k: activity[k] for k in self._get_keys(activity) if k in activity})
 
 
 class GpxFormatter(Formatter):
