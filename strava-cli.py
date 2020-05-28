@@ -34,8 +34,8 @@ def get_token(args):
 
 def list_activities(args):
     r = repository.get_repository(get_token(args), args.update_cache)
-    p = predicates.get_predicate_from_filters(args.filter)
-    f = formatters.get_formatter(args.json, args.quiet, args.verbose)
+    p = predicates.get_predicate_from_filters(args.utc, args.filter)
+    f = formatters.get_formatter(args.json, args.quiet, args.verbose, args.utc)
     for activity in r.get_activities():
         if p.matches(activity):
             print(f.format(activity))
@@ -63,7 +63,7 @@ def update_activities(args):
 
 def activities_details(args):
     r = repository.get_repository(get_token(args), args.update_cache)
-    f = formatters.get_formatter_details(args.json, args.quiet, args.verbose)
+    f = formatters.get_formatter_details(args.json, args.quiet, args.verbose, args.utc)
     for id in args.id:
         if not id.isdigit():
             print('activity {} needs to be a number'.format(id))
@@ -113,6 +113,8 @@ if __name__ == "__main__":
                              help='Prints only activity identifiers')
     parser_list.add_argument('--json', '-j', action='store_true',
                              help='Output in JSON format')
+    parser_list.add_argument('--utc', '-u', action='store_true',
+                             help='Output using the UTC time zone')
     parser_list.add_argument('--verbose', '-v', action='store_true',
                              help='Prints more information about the activity')
     parser_list.add_argument('--update-cache', '-c', type=lambda s: s.lower() in ['true', 'yes'], default=True,
@@ -125,6 +127,8 @@ if __name__ == "__main__":
                              help='Prints only activity identifiers')
     parser_details.add_argument('--json', '-j', action='store_true',
                              help='Output in JSON format')
+    parser_details.add_argument('--utc', '-u', action='store_true',
+                             help='Output using the UTC time zone')
     parser_details.add_argument('--verbose', '-v', action='store_true',
                              help='Prints more information about the activity')
     parser_details.add_argument('--update-cache', '-c', type=lambda s: s.lower() in ['true', 'yes'], default=True,

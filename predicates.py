@@ -18,11 +18,12 @@ class AlwaysTruePredicate(Predicate):
 
 class DatePredicate(Predicate):
 
-    def __init__(self, date):
+    def __init__(self, date, utc = False):
         self._date = date
+        self._utc = utc
 
     def _parse_date(self, value):
-        return util.parse_date(value['start_date_local'])
+        return util.parse_date(value['start_date' if self._utc else 'start_date_local'])
 
 
 class AfterPredicate(DatePredicate):
@@ -75,8 +76,11 @@ class AndPredicate(Predicate):
         return True
 
 
-def parse_date(date_str):
-    return datetime.datetime.strptime(date_str, "%Y%m%d")
+def parse_date(utc, date_str):
+    parsed_date = datetime.datetime.strptime(date_str, "%Y%m%d")
+    if utc:
+        parsed_date.replace(tzinfo=datetime.timezone.utc)
+    return parsed_date
 
 
 def parse_bool(bool_str):
@@ -98,11 +102,11 @@ def parse_range(range_str):
     return (float(tokens[0]), float(tokens[1]))
 
 
-def get_predicate(name, value):
+def get_predicate(utc, name, value):
     if name == "before":
-        return BeforePredicate(parse_date(value))
+        return BeforePredicate(parse_date(utc, value), utc)
     if name == "after":
-        return AfterPredicate(parse_date(value))
+        return AfterPredicate(parse_date(utc, value), utc)
     if name == "trainer":
         return EqPredicate('trainer', parse_bool(value))
     if name == "type":
@@ -118,14 +122,14 @@ def get_predicate(name, value):
     raise ValueError("Invalid type {}".format(name))
 
 
-def get_predicate_from_filters(items):
+def get_predicate_from_filters(utc, items):
     predicates = []
     if items is None:
         return AlwaysTruePredicate()
     for item in items:
         try:
             key, value = item.split("=", 1)
-            predicates.append(get_predicate(key, value))
+            predicates.append(get_predicate(utc, key, value))
         except ValueError as e:
             logging.getLogger("get_predicate_from_filters").exception(e)
             raise ValueError("Invalid value {}".format(item))

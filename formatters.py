@@ -5,9 +5,10 @@ import datetime
 
 class Formatter(object):
 
-    def __init__(self, quiet = False, verbose = False):
+    def __init__(self, quiet = False, verbose = False, utc = False):
         self._quiet = quiet
         self._verbose = verbose
+        self._utc = utc
 
     def _get_keys(self, activity):
         if self._quiet:
@@ -15,7 +16,7 @@ class Formatter(object):
         elif self._verbose:
             return sorted(activity.keys())
         else:
-            return ('id', 'type', 'start_date_local', 'name',
+            return ('id', 'type', 'start_date' if self._utc else 'start_date_local', 'name',
                     'moving_time', 'distance', 'total_elevation_gain')
     
     def format(self, activity):
@@ -79,12 +80,12 @@ class JsonGpsFormatter(Formatter):
         return json.dumps({'activity':activity, 'data':list(gps)})
 
 
-def get_formatter(json_output = False, quiet = False, verbose = False):
-    return JsonFormatter(quiet, verbose) if json_output else DefaultFormatter(quiet, verbose)
+def get_formatter(json_output = False, quiet = False, verbose = False, utc = False):
+    return JsonFormatter(quiet, verbose, utc) if json_output else DefaultFormatter(quiet, verbose, utc)
 
-def get_formatter_details(json_output = False, quiet = False, verbose = False):
-    return JsonFormatter(quiet, verbose) if json_output else DetailFormatter(quiet, verbose)
+def get_formatter_details(json_output = False, quiet = False, verbose = False, utc = False):
+    return JsonFormatter(quiet, verbose, utc) if json_output else DetailFormatter(quiet, verbose, utc)
 
-def get_formatter_gps(json_output = False, quiet = False, verbose = False):
-    return JsonGpsFormatter(quiet, verbose) if json_output else GpxFormatter(quiet, verbose)
+def get_formatter_gps(json_output = False):
+    return JsonGpsFormatter() if json_output else GpxFormatter()
 
