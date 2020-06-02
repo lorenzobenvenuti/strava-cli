@@ -118,7 +118,7 @@ class CachedRepository:
         streams = self._client.get_streams(id)
         activity = self.get_activity(int(id))
         start_time = int(parse_date(activity['start_date']).timestamp())
-        streams = zip(*(streams[key]['data'] for key in ('time', 'latlng', 'altitude')))
+        streams = zip(*(streams[key]['data'] if key in streams else [] for key in ('time', 'latlng', 'altitude')))
         return activity, [(time + start_time, point, altitude) for time, point, altitude in streams]
 
     def get_bikes(self):
