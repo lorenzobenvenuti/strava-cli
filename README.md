@@ -1,3 +1,17 @@
+
+# setup
+
+To use strava-cli you will need python3 and these dependencies:
+
+* flask
+* requests
+* argparse
+* gpxpy
+
+You can install them if you have pip for python3:
+
+* `pip3 install --user --requirement requirements.txt`
+
 # strava-cli
 
 Command line interface for [Strava](http://www.strava.com). It allows to:
