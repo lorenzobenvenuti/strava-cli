@@ -108,7 +108,9 @@ class CachedRepository:
         return self._cache.get_activity(id)
 
     def get_activity_detail(self, id):
-        activity_detail = self._cache.get_activity_detail(id)
+        activity_detail = None
+        if not self._run_update_cache:
+            activity_detail = self._cache.get_activity_detail(id)
         if activity_detail is None:
             activity_detail = self._client.get_activity_detail(id)
             self._cache.update_activity_detail(activity_detail)
