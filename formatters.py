@@ -5,26 +5,18 @@ import datetime
 
 class Formatter(object):
 
-    def __init__(self, quiet = False, verbose = False):
+    def __init__(self, quiet = False, verbose = False, utc = False):
         self._quiet = quiet
         self._verbose = verbose
+        self._utc = utc
 
-    def get_keys(self):
+    def _get_keys(self, activity):
         if self._quiet:
             return ('id',)
         elif self._verbose:
-            return ('id', 'external_id', 'upload_id', 'athlete', 'name',
-                    'distance', 'moving_time', 'elapsed_time',
-                    'total_elevation_gain', 'elev_high', 'elev_low', 'type',
-                    'start_date', 'start_date_local', 'timezone', 'start_latlng',
-                    'end_latlng', 'achievement_count', 'kudos_count', 'comment_count',
-                    'athlete_count', 'photo_count', 'total_photo_count', 'map', 'trainer',
-                    'commute', 'manual', 'private', 'flagged', 'workout_type',
-                    'upload_id_str', 'average_speed', 'max_speed', 'has_kudoed',
-                    'gear_id', 'kilojoules', 'average_watts', 'device_watts', 'max_watts',
-                    'weighted_average_watts')
+            return sorted(activity.keys())
         else:
-            return ('id', 'type', 'start_date_local', 'name',
+            return ('id', 'type', 'start_date' if self._utc else 'start_date_local', 'name',
                     'moving_time', 'distance', 'total_elevation_gain')
     
     def format(self, activity):
@@ -35,7 +27,7 @@ class DefaultFormatter(Formatter):
 
     def format(self, activity):
         output = ''
-        for key in self.get_keys():
+        for key in self._get_keys(activity):
             output_value = activity.get(key, '')
             if key == 'start_date_local':
                 output_value = output_value.replace('Z','') #Z is incorrect here
@@ -46,7 +38,7 @@ class DetailFormatter(Formatter):
 
     def format(self, activity):
         output = '{}\n'.format(activity['id'])
-        for key in self.get_keys():
+        for key in self._get_keys(activity):
             if key != 'id' and key in activity:
                 output_value = activity[key]
                 if key == 'start_date_local':
@@ -57,7 +49,7 @@ class DetailFormatter(Formatter):
 class JsonFormatter(Formatter):
 
     def format(self, activity):
-        return json.dumps({k: activity[k] for k in self.get_keys() if k in activity})
+        return json.dumps({k: activity[k] for k in self._get_keys(activity) if k in activity})
 
 
 class GpxFormatter(Formatter):
@@ -88,12 +80,12 @@ class JsonGpsFormatter(Formatter):
         return json.dumps({'activity':activity, 'data':list(gps)})
 
 
-def get_formatter(json_output = False, quiet = False, verbose = False):
-    return JsonFormatter(quiet, verbose) if json_output else DefaultFormatter(quiet, verbose)
+def get_formatter(json_output = False, quiet = False, verbose = False, utc = False):
+    return JsonFormatter(quiet, verbose, utc) if json_output else DefaultFormatter(quiet, verbose, utc)
 
-def get_formatter_details(json_output = False, quiet = False, verbose = False):
-    return JsonFormatter(quiet, verbose) if json_output else DetailFormatter(quiet, verbose)
+def get_formatter_details(json_output = False, quiet = False, verbose = False, utc = False):
+    return JsonFormatter(quiet, verbose, utc) if json_output else DetailFormatter(quiet, verbose, utc)
 
-def get_formatter_gps(json_output = False, quiet = False, verbose = False):
-    return JsonGpsFormatter(quiet, verbose) if json_output else GpxFormatter(quiet, verbose)
+def get_formatter_gps(json_output = False):
+    return JsonGpsFormatter() if json_output else GpxFormatter()
 

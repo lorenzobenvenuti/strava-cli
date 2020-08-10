@@ -107,11 +107,20 @@ class CachedRepository:
         self._update_cache()
         return self._cache.get_activity(id)
 
+    def get_activity_detail(self, id):
+        activity_detail = None
+        if not self._run_update_cache:
+            activity_detail = self._cache.get_activity_detail(id)
+        if activity_detail is None:
+            activity_detail = self._client.get_activity_detail(id)
+            self._cache.update_activity_detail(activity_detail)
+        return activity_detail
+
     def get_gps(self, id):
         streams = self._client.get_streams(id)
         activity = self.get_activity(int(id))
         start_time = int(parse_date(activity['start_date']).timestamp())
-        streams = zip(*(streams[key]['data'] for key in ('time', 'latlng', 'altitude')))
+        streams = zip(*(streams[key]['data'] if key in streams else [] for key in ('time', 'latlng', 'altitude')))
         return activity, [(time + start_time, point, altitude) for time, point, altitude in streams]
 
     def get_bikes(self):

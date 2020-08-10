@@ -1,3 +1,4 @@
+
 # strava-cli
 
 Command line interface for [Strava](http://www.strava.com). It allows to:
@@ -29,6 +30,19 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
 ```
+
+## Setup
+
+To use strava-cli you will need python3 and these dependencies:
+
+* flask
+* requests
+* argparse
+* gpxpy
+
+You can install them if you have pip for python3:
+
+* `pip3 install --user --requirement requirements.txt`
 
 ## Obtaining a token
 
