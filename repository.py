@@ -70,6 +70,18 @@ class CachedRepository:
         activities = self.get_all_activities()
         self._cache.update_activities(activities)
 
+    def _merge_lists(self, activities, new_activities):
+        #combine the two lists and make sure the new list is sorted by utc date
+        activity_ids = {activity['id']: index for index, activity in enumerate(activities)}
+        import sys
+        for new_activity in new_activities:
+            id = new_activity['id']
+            if id in activity_ids:
+                activities[activity_ids[id]] = new_activity
+            else:
+                activities.append(new_activity)
+        return sorted(activities, key=lambda activity: activity['start_date'], reverse=True)
+    
     def _update_cache(self):
         if not self._cache.is_initialized():
             self._init_cache()
@@ -96,8 +108,8 @@ class CachedRepository:
                 logging.getLogger('CachedRepository').debug(
                                             "No more activities to load")
                 break
-        new_activities.reverse()
-        self._cache.update_activities(new_activities + activities)
+        activities = self._merge_lists(activities, new_activities)
+        self._cache.update_activities(activities)
 
     def get_activities(self):
         self._update_cache()
