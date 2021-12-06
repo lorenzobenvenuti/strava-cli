@@ -10,8 +10,8 @@ class ApiRepository:
 
     page_size = 30
 
-    def __init__(self, token):
-        self._client = api.Client(token)
+    def __init__(self, token, sleep = None):
+        self._client = api.Client(token, sleep)
 
     def get_activities(self):
         all_activities = []
@@ -42,8 +42,8 @@ class CachedRepository:
 
     page_size = 30
 
-    def __init__(self, token, cache, update_cache = True):
-        self._client = api.Client(token)
+    def __init__(self, token, cache, update_cache = True, sleep = None):
+        self._client = api.Client(token, sleep)
         self._cache = cache
         self._run_update_cache = update_cache
 
@@ -158,5 +158,5 @@ class CachedRepository:
             self._cache.update_activity(activity)
 
 
-def get_repository(token, update_cache = True):
-    return CachedRepository(token, cache.get_cache(), update_cache)
+def get_repository(token, update_cache = True, sleep = None):
+    return CachedRepository(token, cache.get_cache(), update_cache, sleep)

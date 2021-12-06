@@ -1,22 +1,27 @@
 import requests
+import sys
+import time
 
 
 class Client(object):
 
-    def __init__(self, token):
+    def __init__(self, token, sleep_time = None):
         self._token = token
+        self._sleep_time = sleep_time
 
     def _get_headers(self):
         return {"Authorization": "Bearer {}".format(self._token)}
 
     def _get(self, url):
         r = requests.get(url, headers=self._get_headers())
+        self._sleep()
         if r.status_code != 200:
             raise ValueError(r.text)
         return r.json()
 
     def _put(self, url, data):
         r = requests.put(url, data, headers=self._get_headers())
+        self._sleep()
         if r.status_code != 200:
             raise ValueError()
 
@@ -46,3 +51,10 @@ class Client(object):
 
     def get_athlete(self):
         return self._get("https://www.strava.com/api/v3/athlete")
+    
+    def _sleep(self):
+        #used because of throttling strava api
+        if self._sleep_time is not None:
+            print('sleep {}'.format(self._sleep_time), file=sys.stderr)
+            time.sleep(self._sleep_time)
+
