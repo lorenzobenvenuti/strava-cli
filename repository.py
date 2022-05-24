@@ -8,7 +8,7 @@ import logging
 #unused
 class ApiRepository:
 
-    page_size = 30
+    page_size = 100
 
     def __init__(self, token, sleep = None):
         self._client = api.Client(token, sleep)
@@ -40,7 +40,7 @@ class ApiRepository:
 
 class CachedRepository:
 
-    page_size = 30
+    page_size = 100
 
     def __init__(self, token, cache, update_cache = True, sleep = None):
         self._client = api.Client(token, sleep)
@@ -94,17 +94,16 @@ class CachedRepository:
                             "Newest activity in cache {}".format(timestamp))
         new_activities = []
         page = 1
-        per_page = 30
         while True:
             logging.getLogger('CachedRepository').info(
-                    "Loading page {} of {} elements".format(page, per_page))
+                    "Loading page {} of {} elements".format(page, CachedRepository.page_size))
             curr_activities = self._client.get_activities_after(
-                                                timestamp, page, per_page)
+                                                timestamp, page, CachedRepository.page_size)
             logging.getLogger('CachedRepository').debug(
                     "{} activities loaded".format(len(curr_activities)))
             page += 1
             new_activities.extend(curr_activities)
-            if len(curr_activities) < per_page:
+            if len(curr_activities) < CachedRepository.page_size:
                 logging.getLogger('CachedRepository').debug(
                                             "No more activities to load")
                 break
