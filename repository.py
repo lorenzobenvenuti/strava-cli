@@ -8,10 +8,10 @@ import logging
 #unused
 class ApiRepository:
 
-    page_size = 30
+    page_size = 100
 
-    def __init__(self, token):
-        self._client = api.Client(token)
+    def __init__(self, token, sleep = None):
+        self._client = api.Client(token, sleep)
 
     def get_activities(self):
         all_activities = []
@@ -40,10 +40,10 @@ class ApiRepository:
 
 class CachedRepository:
 
-    page_size = 30
+    page_size = 100
 
-    def __init__(self, token, cache, update_cache = True):
-        self._client = api.Client(token)
+    def __init__(self, token, cache, update_cache = True, sleep = None):
+        self._client = api.Client(token, sleep)
         self._cache = cache
         self._run_update_cache = update_cache
 
@@ -62,7 +62,7 @@ class CachedRepository:
     def _get_latest_timestamp(self, activities):
         if not activities:
             return 0
-        max_date = max([parse_date(a['start_date_local']) for a in activities])
+        max_date = max([parse_date(a['start_date']) for a in activities])
         return int(max_date.timestamp())
 
     def _init_cache(self):
@@ -70,6 +70,18 @@ class CachedRepository:
         activities = self.get_all_activities()
         self._cache.update_activities(activities)
 
+    def _merge_lists(self, activities, new_activities):
+        #combine the two lists and make sure the new list is sorted by utc date
+        activity_ids = {activity['id']: index for index, activity in enumerate(activities)}
+        import sys
+        for new_activity in new_activities:
+            id = new_activity['id']
+            if id in activity_ids:
+                activities[activity_ids[id]] = new_activity
+            else:
+                activities.append(new_activity)
+        return sorted(activities, key=lambda activity: activity['start_date'], reverse=True)
+    
     def _update_cache(self):
         if not self._cache.is_initialized():
             self._init_cache()
@@ -82,22 +94,21 @@ class CachedRepository:
                             "Newest activity in cache {}".format(timestamp))
         new_activities = []
         page = 1
-        per_page = 30
         while True:
             logging.getLogger('CachedRepository').info(
-                    "Loading page {} of {} elements".format(page, per_page))
+                    "Loading page {} of {} elements".format(page, CachedRepository.page_size))
             curr_activities = self._client.get_activities_after(
-                                                timestamp, page, per_page)
+                                                timestamp, page, CachedRepository.page_size)
             logging.getLogger('CachedRepository').debug(
                     "{} activities loaded".format(len(curr_activities)))
             page += 1
             new_activities.extend(curr_activities)
-            if len(curr_activities) < per_page:
+            if len(curr_activities) < CachedRepository.page_size:
                 logging.getLogger('CachedRepository').debug(
                                             "No more activities to load")
                 break
-        new_activities.reverse()
-        self._cache.update_activities(new_activities + activities)
+        activities = self._merge_lists(activities, new_activities)
+        self._cache.update_activities(activities)
 
     def get_activities(self):
         self._update_cache()
@@ -146,5 +157,5 @@ class CachedRepository:
             self._cache.update_activity(activity)
 
 
-def get_repository(token, update_cache = True):
-    return CachedRepository(token, cache.get_cache(), update_cache)
+def get_repository(token, update_cache = True, sleep = None):
+    return CachedRepository(token, cache.get_cache(), update_cache, sleep)

@@ -68,7 +68,7 @@ class GpxFormatter(Formatter):
 
 
         for time, point, altitude in gps:
-            time = datetime.datetime.fromtimestamp(time)
+            time = datetime.datetime.fromtimestamp(time).astimezone()
             gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(latitude=point[0], longitude=point[1], elevation=altitude, time=time))
             
         return gpx.to_xml(prettyprint=True)

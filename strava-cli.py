@@ -33,7 +33,7 @@ def get_token(args):
 
 
 def list_activities(args):
-    r = repository.get_repository(get_token(args), args.update_cache)
+    r = repository.get_repository(get_token(args), args.update_cache, args.sleep)
     p = predicates.get_predicate_from_filters(args.utc, args.filter)
     f = formatters.get_formatter(args.json, args.quiet, args.verbose, args.utc)
     for activity in r.get_activities():
@@ -52,7 +52,7 @@ def get_update_data(args):
 
 
 def update_activities(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), sleep=args.sleep)
     data = get_update_data(args)
     for id in args.id:
         if not id.isdigit():
@@ -62,7 +62,7 @@ def update_activities(args):
 
 
 def activities_details(args):
-    r = repository.get_repository(get_token(args), args.update_cache)
+    r = repository.get_repository(get_token(args), args.update_cache, args.sleep)
     f = formatters.get_formatter_details(args.json, args.quiet, args.verbose, args.utc)
     for id in args.id:
         if not id.isdigit():
@@ -73,7 +73,7 @@ def activities_details(args):
 
 
 def activities_gps(args):
-    r = repository.get_repository(get_token(args), args.update_cache)
+    r = repository.get_repository(get_token(args), args.update_cache, args.sleep)
     f = formatters.get_formatter_gps(args.json)
     for id in args.id:
         if not id.isdigit():
@@ -83,13 +83,13 @@ def activities_gps(args):
 
 
 def list_bikes(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), sleep=args.sleep)
     for bike in r.get_bikes():
         print('{id:<20} {name:<20}'.format(**bike))
 
 
 def list_shoes(args):
-    r = repository.get_repository(get_token(args))
+    r = repository.get_repository(get_token(args), sleep=args.sleep)
     for shoe in r.get_shoes():
         print('{id:<20} {name:<20}'.format(**shoe))
 
@@ -103,6 +103,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         description='Strava Command Line Interface')
     parser.set_defaults(func=lambda args: parser.print_help())
+    parser.add_argument('--sleep', '-s', type=int,
+                            help='Sleep between every api call')
     subparsers = parser.add_subparsers()
 
     parser_list = subparsers.add_parser('activities', help='List activities '
