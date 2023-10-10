@@ -90,6 +90,7 @@ class CachedRepository:
             return
         activities = self._cache.get_activities()
         timestamp = self._get_latest_timestamp(activities)
+        #timestamp = 0 #a harder cache update is required if you change old data
         logging.getLogger('CachedRepository').debug(
                             "Newest activity in cache {}".format(timestamp))
         new_activities = []
