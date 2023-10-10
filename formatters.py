@@ -1,6 +1,7 @@
 import json
 import gpxpy
 import datetime
+import xml.etree.ElementTree as ElementTree
 
 
 class Formatter(object):
@@ -54,8 +55,10 @@ class JsonFormatter(Formatter):
 
 class GpxFormatter(Formatter):
 
-    def format(self, activity, gps):
+    def format(self, activity, stream_types, gps):
         gpx = gpxpy.gpx.GPX()
+        
+        self.setup_extensions(gpx, stream_types)
 
         gpx_track = gpxpy.gpx.GPXTrack(
             name=activity.get('name'))
@@ -67,16 +70,58 @@ class GpxFormatter(Formatter):
         gpx_track.segments.append(gpx_segment)
 
 
-        for time, point, altitude in gps:
-            time = datetime.datetime.fromtimestamp(time).astimezone()
-            gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(latitude=point[0], longitude=point[1], elevation=altitude, time=time))
+        for entry in gps:
+            time = datetime.datetime.fromtimestamp(entry['time']).astimezone(datetime.timezone.utc) if 'time' in entry else None
+            point = entry['latlng'] if 'latlng' in entry else [None, None]
+            altitude = entry['altitude'] if 'altitude' in entry else None
             
+            point = gpxpy.gpx.GPXTrackPoint(latitude=point[0], longitude=point[1], elevation=altitude, time=time)
+            gpx_segment.points.append(point)
+            
+            main_extension = ElementTree.Element('gpxtpx:TrackPointExtension')
+            
+            if 'gpxtpx' in gpx.nsmap:
+                if 'temp' in entry:
+                    temperature = ElementTree.SubElement(main_extension, 'gpxtpx:atemp')
+                    temperature.text = str(entry['temp'])
+                
+                if 'heartrate' in entry:
+                    heart_rate = ElementTree.SubElement(main_extension, 'gpxtpx:hr')
+                    heart_rate.text = str(entry['heartrate'])
+                
+                if 'cadence' in entry:
+                    cadence = ElementTree.SubElement(main_extension, 'gpxtpx:cad')
+                    cadence.text = str(entry['cadence'])
+                
+                if 'velocity_smooth' in entry:
+                    speed = ElementTree.SubElement(main_extension, 'gpxtpx:speed')
+                    speed.text = str(entry['velocity_smooth'])
+                
+                if len(main_extension) > 0:
+                    point.extensions.append(main_extension)
+            
+            if 'gpxpx' in gpx.nsmap and 'watts' in entry:
+                power = ElementTree.Element('gpxpx:PowerInWatts')
+                power.text = str(round(entry['watts']))
+                point.extensions.append(power)
+        
         return gpx.to_xml(prettyprint=True)
+
+    def setup_extensions(self, gpx, stream_types):
+        if 'heartrate' in stream_types or 'cadence' in stream_types or 'temp' in stream_types or 'velocity_smooth' in stream_types:
+            # https://www8.garmin.com/xmlschemas/TrackPointExtensionv2.xsd
+            gpx.nsmap['gpxtpx'] = 'http://www.garmin.com/xmlschemas/TrackPointExtension/v2'
+            ElementTree.register_namespace('gpxtpx', 'http://www.garmin.com/xmlschemas/TrackPointExtension/v2')
+        
+        if 'watts' in stream_types:
+            # https://www8.garmin.com/xmlschemas/PowerExtensionv1.xsd
+            gpx.nsmap['gpxpx'] = 'http://www.garmin.com/xmlschemas/PowerExtension/v1'
+            ElementTree.register_namespace('gpxpx', 'http://www.garmin.com/xmlschemas/PowerExtension/v1')
 
 
 class JsonGpsFormatter(Formatter):
 
-    def format(self, activity, gps):
+    def format(self, activity, stream_types, gps):
         return json.dumps({'activity':activity, 'data':list(gps)})
 
 

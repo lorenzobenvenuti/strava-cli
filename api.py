@@ -1,3 +1,4 @@
+import logging
 import requests
 import sys
 import time
@@ -13,6 +14,7 @@ class Client(object):
         return {"Authorization": "Bearer {}".format(self._token)}
 
     def _get(self, url):
+        logging.getLogger('Client').debug('http get {}'.format(url))
         r = requests.get(url, headers=self._get_headers())
         self._sleep()
         if r.status_code != 200:
@@ -45,7 +47,7 @@ class Client(object):
         return self._get(
             "https://www.strava.com/api/v3/activities/{}".format(id))
 
-    def get_streams(self, id, stream_types = ['time','latlng','altitude']):
+    def get_streams(self, id, stream_types):
         return self._get(
             "https://www.strava.com/api/v3/activities/{}/streams?keys={}&key_by_type=true".format(id, ','.join(stream_types)))
 
@@ -54,7 +56,7 @@ class Client(object):
     
     def _sleep(self):
         #used because of throttling strava api
-        if self._sleep_time is not None:
-            print('sleep {}'.format(self._sleep_time), file=sys.stderr)
+        if self._sleep_time is not None and self._sleep_time != 0:
+            logging.getLogger('Client').info('sleep {}'.format(self._sleep_time))
             time.sleep(self._sleep_time)
 

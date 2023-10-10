@@ -4,3 +4,4 @@ build
 strava-cli.spec
 venv
 .idea
+xsd/*.gpx

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
+    <import namespace="http://www.topografix.com/GPX/1/1" schemaLocation="gpx.xsd"/>
+    <import namespace="http://www.garmin.com/xmlschemas/TrackPointExtension/v2" schemaLocation="TrackPointExtensionv2.xsd"/>
+    <import namespace="http://www.garmin.com/xmlschemas/PowerExtension/v1" schemaLocation="PowerExtensionv1.xsd"/>
+    <import namespace="http://www.garmin.com/xmlschemas/GpxExtensions/v3" schemaLocation="GpxExtensionsv3.xsd"/>
+</schema>
