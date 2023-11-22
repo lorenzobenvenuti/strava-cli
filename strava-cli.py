@@ -10,11 +10,18 @@ import cache
 import logging
 
 
-logging.basicConfig(
-    filename=config.get_log_file(),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.DEBUG
-)
+def setup_logging():
+    logging.basicConfig(
+        filename=config.get_log_file(),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG
+    )
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+
+    logging.getLogger().addHandler(stream_handler)
+
 
 
 def authenticate(args):
@@ -99,6 +106,7 @@ def clear_cache(args):
     cache.get_cache().clear()
 
 
+setup_logging()
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                         description='Strava Command Line Interface')

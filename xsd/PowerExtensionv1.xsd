@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<xsd:schema targetNamespace="http://www.garmin.com/xmlschemas/PowerExtension/v1"
+  elementFormDefault="qualified" xmlns="http://www.garmin.com/xmlschemas/PowerExtension/v1"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:annotation>
+    <xsd:documentation> This schema defines Garmin extensions to be used with the GPX 1.1 schema.
+      The root element defined by this schema is intended to be used as a child element of the
+      "extensions" elements in the trkpt element in the GPX 1.1 schema. The GPX 1.1 schema is
+      available at http://www.topografix.com/GPX/1/1/gpx.xsd. </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:element name="PowerInWatts" type="xsd:unsignedShort"/>
+
+</xsd:schema>

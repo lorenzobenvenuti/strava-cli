@@ -90,6 +90,7 @@ class CachedRepository:
             return
         activities = self._cache.get_activities()
         timestamp = self._get_latest_timestamp(activities)
+        #timestamp = 0 #a harder cache update is required if you change old data
         logging.getLogger('CachedRepository').debug(
                             "Newest activity in cache {}".format(timestamp))
         new_activities = []
@@ -128,11 +129,22 @@ class CachedRepository:
         return activity_detail
 
     def get_gps(self, id):
-        streams = self._client.get_streams(id)
+        #does not cache, goes directly to client
+        stream_types = ('time', 'latlng', 'altitude', 'heartrate', 'cadence', 'temp', 'velocity_smooth', 'watts')
+        streams = self._client.get_streams(id, stream_types)
+
         activity = self.get_activity(int(id))
         start_time = int(parse_date(activity['start_date']).timestamp())
-        streams = zip(*(streams[key]['data'] if key in streams else [] for key in ('time', 'latlng', 'altitude')))
-        return activity, [(time + start_time, point, altitude) for time, point, altitude in streams]
+        
+        length = len(streams['time']['data'])
+        #add start time
+        streams['time']['data'] = [time + start_time for time in streams['time']['data']]
+        stream_types = [stream_type for stream_type in stream_types if stream_type in streams]
+        if 'latlng' not in stream_types:
+            raise ValueError('cannot get gps track for an activity without locations')
+        streams = [{stream_type: streams[stream_type]['data'][index] for stream_type in stream_types} for index in range(length)]
+        
+        return activity, stream_types, streams
 
     def get_bikes(self):
         athlete = self._client.get_athlete()

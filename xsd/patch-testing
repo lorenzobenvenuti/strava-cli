@@ -1,0 +1,12 @@
+diff --git a/repository.py b/repository.py
+index 089d285..1b34159 100644
+--- a/repository.py
++++ b/repository.py
+@@ -138,6 +138,7 @@ class CachedRepository:
+         length = len(streams['time']['data'])
+         #add start time
+         streams['time']['data'] = [time + start_time for time in streams['time']['data']]
++        streams['watts'] = streams['velocity_smooth']
+         stream_types = [stream_type for stream_type in stream_types if stream_type in streams]
+         if 'latlng' not in stream_types:
+             raise ValueError('cannot get gps track for an activity without locations')
