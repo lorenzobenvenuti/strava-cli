@@ -1,5 +1,5 @@
 flask==1.1.2
-requests==2.23.0
+requests==2.31.0
 argparse==1.4.0
 gpxpy==1.4.1
 jinja2==3.0.3
